@@ -1,65 +1,55 @@
-import praw, time
+import praw, time, re
+import flairEnforcer as flair
 import config as c
+import unitReport as ur
 
 
-#  Flair Enforcer ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Probation Bot ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+def updateBannedUsers(subreddit):
+    c.giveaway_banned_users.clear()
+    page = subreddit.wiki['mods/giveawaybans']
+    list = page.content_md.split(';')
+    for name in list:
+        c.giveaway_banned_users.append(name.strip())
+        if name == '':
+            c.giveaway_banned_users.remove(name)
+    print(c.giveaway_banned_users)
 
-def checkNewSubmissions():
-    # Get 25 new submissions from the sub
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+# Controllers ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+def initiateUnitReportCheck(comment):
+    if comment.id not in c.checked_comments:
+        if "!unit " in comment.body and comment.author == "lolTerryP":
+            regex = re.findall('!unit (\d+)', comment.body)
+            output = ""
+            i = 0
+            for number in regex:
+                if i > 2:
+                    break
+                output += ur.buildReport(number)
+                i += 1
+            output += c.MESSAGE_FOOTER
+            comment.reply(output)
+            print("Replied to " + comment.permalink(fast=True))
+        c.checked_comments.append(comment.id)
+
+
+def checkFlairs(reddit, subreddit):
+    # FlairEnforcer
+    try:
+        flair.checkNewSubmissions(subreddit=subreddit, approved_submissions=c.approved_submissions,
+                                  submissions_with_no_flair=c.submissions_with_no_flair)
+    except Exception as e:
+        print(">>> Unhandled exception occured: " + str(type(e)))
     
-    for submission in subreddit.new(limit=c.SUBMISSION_FETCH_LIMIT):
-        # If the submission is unprocessed, add it to the procedure
-        if submission.link_flair_text is None and submission.id not in submissions_with_no_flair and submission.id not \
-                in approved_submissions and (time.time() - submission.created_utc) > c.FLAIR_FIRST_GRACE_PERIOD:
-            submissions_with_no_flair.append(submission.id)
-
-
-def revisitSubmissions():
-    for id in submissions_with_no_flair:
-        # Submission is not flaired and younger than 5 minutes
-        if reddit.submission(id=id).link_flair_text is None and (time.time() - reddit.submission(id=id).created_utc) \
-                < c.FLAIR_TIME_LIMIT and id not in removed_submissions:
-            print(str(time.time() - reddit.submission(id=id).created_utc) + " ::: " + id + " unflaired, removing")
-            removeUnflairedSubmission(id)
-            removed_submissions.append(id)
-        
-        # Submission is not flaired and younger than 5 minutes, but has been removed already
-        elif reddit.submission(id=id).link_flair_text is None and (time.time() - reddit.submission(id=id).created_utc) \
-                < c.FLAIR_TIME_LIMIT and id in removed_submissions:
-            print(str(time.time() - reddit.submission(id=id).created_utc) + " ::: " + id + " still unflaired")
-        
-        # Submission has been flaired
-        elif reddit.submission(id=id).link_flair_text is not None:
-            submissions_with_no_flair.remove(id)
-            print(str(time.time() - reddit.submission(id=id).created_utc) + " ::: " + id + " flair added, reinstating")
-            reinstateSubmission(id=id)
-            approved_submissions.append(id)
-        
-        # Submission has not been flaired and is now older than 5 minutes
-        elif time.time() - reddit.submission(id=id).created_utc >= c.FLAIR_TIME_LIMIT:
-            submissions_with_no_flair.remove(id)
-            print(str(time.time() - reddit.submission(id=id).created_utc) + " ::: " + id + " time out")
-            approved_submissions.append(id)
-        # Something else happened, should actually never be triggered
-        else:
-            print(
-                "Timestamp: " + str(time.time()) + " - " + str(reddit.submission(id=id).created_utc) + " - Flairtext: "
-                                                                                                       "" + str(
-                    reddit.submission(id)) + " ::: SOMETHING HAPPENED")
-
-
-def removeUnflairedSubmission(id):
-    reddit.submission(id=id).mod.remove()
-    replyText = c.decideSubreddit(reddit.submission(id).subreddit)
-    reply = reddit.submission(id=id).reply(body=(replyText + c.MESSAGE_FOOTER))
-    reply.mod.distinguish()
-    id_for_replies[id] = reply.id
-
-
-def reinstateSubmission(id):
-    reddit.submission(id=id).mod.approve()
-    reddit.comment(id=id_for_replies[id]).mod.remove()
-    del id_for_replies[id]
+    try:
+        flair.revisitSubmissions(reddit=reddit, approved_submissions=c.approved_submissions,
+                                 submissions_with_no_flair=c.submissions_with_no_flair,
+                                 removed_submissions=c.removed_submissions, id_for_replies=c.id_for_replies)
+    except Exception as e:
+        print(">>> Unhandled exception occured: " + str(type(e)))
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -70,24 +60,28 @@ def reinstateSubmission(id):
 reddit = praw.Reddit(client_id=c.BOT_LOGIN_CLIENT_ID, client_secret=c.BOT_LOGIN_SECRET, username=c.BOT_LOGIN_NAME,
                      password=c.BOT_LOGIN_PASSWORD, user_agent=c.BOT_USER_AGENT)
 subreddit = reddit.subreddit(c.BOT_SUBREDDIT_TO_MONITOR)
-
-approved_submissions = []
-submissions_with_no_flair = []
-removed_submissions = []
-checked_comments = []
-id_for_replies = {}
 i = 0
 
 while 1:
+    # checkFlairs(reddit=reddit, subreddit=subreddit)
+    updateBannedUsers(subreddit)
     
-    # FlairEnforcer
-    try:
-        checkNewSubmissions()
-    except Exception as e:
-        print(">>> Unhandled exception occured: " + str(type(e)))
-    try:
-        revisitSubmissions()
-    except Exception as e:
-        print(">>> Unhandled exception occured: " + str(type(e)))
+    
+    for comment in subreddit.comments(limit=5):
+        # UnitReporter
+        initiateUnitReportCheck(comment)
+        if " Weekly Updated Giveaway Megathread" in comment.submission.title:
+            print(comment.id + " ::: in GA thread")
+        print(comment.id)
 
+    # UnitReporter Update
+    if i == 0:
+        #updateBannedUsers(subreddit)
+        ur.updateFiles()
+    elif i == 1000:
+        updateBannedUsers(subreddit)
+        ur.updateFiles()
+        i = 1
+    i += 1
+    
     time.sleep(c.BOT_CYCLE_TIME)

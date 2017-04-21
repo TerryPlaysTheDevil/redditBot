@@ -1,11 +1,12 @@
 # Configuration Section ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 BOT_SUBREDDIT_TO_MONITOR = "OnePieceTC"  # Add more than one like so: "Subreddit_1+Subreddit_2+Subreddit_3"
-BOT_LOGIN_NAME = "XXX"
-BOT_LOGIN_PASSWORD = "YYY"
-BOT_LOGIN_CLIENT_ID = "ZZZ"
-BOT_LOGIN_SECRET = "WASD"
+BOT_LOGIN_NAME = "OPTCBot"
+BOT_LOGIN_PASSWORD = "wrSQHSSMsrKHm$@Xu7g8&$nN6P9hCtYJD*H2sRh@bMF"
+BOT_LOGIN_CLIENT_ID = "xEKIjwnolMirSw"
+BOT_LOGIN_SECRET = "ZIwaJdNWO8aZRy0bWnDzFch5jcA"
 
-BOT_USER_AGENT = "USERAGENT"
+BOT_USER_AGENT = "Subreddit monitoring and moderation bot with some subreddit specific functionalities for " \
+                 "/r/OnePieceTC by /u/lolTerryP"
 BOT_CYCLE_TIME = 5  # How long do you want the bot to sleep after every run. Be aware that each cycle takes about 5
 # seconds to complete, so a 5 second cycle pause would mean a completed run about every 10 seconds
 
@@ -15,8 +16,16 @@ MESSAGE_FOOTER = "\n\n-----\n**[Please read this.](/str)** I am a bot in develop
                  " him by clicking [here](https://www.reddit.com/message/compose?to=lolTerryP&subject=OPTCBot)."
 
 
+# Probation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+giveaway_banned_users = []
 
-# Flair Enforcer
+
+# Flair Enforcer ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+approved_submissions = []
+submissions_with_no_flair = []
+removed_submissions = []
+checked_comments = []
+id_for_replies = {}
 SUBMISSION_FETCH_LIMIT = 10
 FLAIR_TIME_LIMIT = 1020  # If you change this, change it in the FLAIR_FLAIR_MISSING_MESSAGE as well
 FLAIR_FIRST_GRACE_PERIOD = 120  # Needs to be smaller than FLAIR_TIME_LIMIT
@@ -31,19 +40,64 @@ FLAIR_FLAIR_MISSING_MESSAGE_OPTC = ("/r/OnePieceTC requires you to flair your po
                                     "after this comment was created. If you add a flair after that, it will have no "
                                     "effect "
                                     "and you will have to resubmit your post.\n\n")
-
 FLAIR_FLAIR_MISSING_MESSAGE_NARUTO = ""
-
 
 def decideSubreddit(subreddit):
     if subreddit == "OnePieceTC":
-        return FLAIR_FLAIR_MISSING_MESSAGE_OPTC
+        return (FLAIR_FLAIR_MISSING_MESSAGE_OPTC)
     elif subreddit == "NarutoBlazing":
-        return FLAIR_FLAIR_MISSING_MESSAGE_NARUTO
+        return (FLAIR_FLAIR_MISSING_MESSAGE_NARUTO)
         # elif subreddit == "XXX":
         #    return (FLAIR_FLAIR_MISSING_MESSAGE_XXX)
     else:
-        # subreddit could not be identified for some reason, eg trouble with the API, I'd recommend to have a default
-        #  message for this situation
+        # subreddit could not be identified for some reason, eg trouble with the API, I'd recommend to have a
         return FLAIR_FLAIR_MISSING_MESSAGE_DEFAULT
 
+
+# Unit Report Stats ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+UNIT_STAT_NAME = ""
+UNIT_STAT_TYPE = ""
+UNIT_STAT_CLASS1 = ""
+UNIT_STAT_CLASS2 = ""
+UNIT_STAT_HP = ""
+UNIT_STAT_ATK = ""
+UNIT_STAT_RCV = ""
+UNIT_STAT_SOCKETS = ""
+UNIT_STAT_COMBO = ""
+UNIT_STAT_CAPTAIN = ""
+UNIT_STAT_CAPTAIN_NAME = ""
+UNIT_STAT_SAILOR = ""
+UNIT_STAT_SPECIAL = ""
+UNIT_STAT_SPECIAL_NAME = ""
+UNIT_STAT_SPECIAL_NOTES = ""
+UNIT_STAT_COOLDOWN_MAX = ""
+UNIT_STAT_COOLDOWN_MIN = ""
+
+# Unit Report Messages ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+MESSAGE_UNIT_REPORT_HEADER = "Ohayooooo~! I have attached the unit report for '" + UNIT_STAT_NAME + "' below!"
+MESSAGE_UNIT_REPORT_NAME = "* ["
+MESSAGE_UNIT_REPORT_TYPE = "](/"
+MESSAGE_UNIT_REPORT_CLASS1 = ")\n\n  "
+MESSAGE_UNIT_REPORT_CLASS2 = "/"
+MESSAGE_UNIT_REPORT_HP = "\n\n  HP: "
+MESSAGE_UNIT_REPORT_ATK = "  \n  ATK: "
+MESSAGE_UNIT_REPORT_RCV = "  \n  RCV: "
+MESSAGE_UNIT_REPORT_SOCKETS = "\n\n  Sockets:  "
+MESSAGE_UNIT_REPORT_COMBO = "  \n  Combo: "
+MESSAGE_UNIT_REPORT_CAPTAIN = "\n\n  **Abilities** \n  - **Captain**  \n  "
+MESSAGE_UNIT_REPORT_SAILOR = "\n  - **Sailor**  \n  "
+MESSAGE_UNIT_REPORT_SPECIAL1 = "  \n  - **Special** - "
+MESSAGE_UNIT_REPORT_SPECIAL2 = "  "
+MESSAGE_UNIT_REPORT_COOLDOWN1 = "  \n  *Cooldown "
+MESSAGE_UNIT_REPORT_COOLDOWN2 = " → "
+MESSAGE_UNIT_REPORT_COOLDOWN3 = "* \n"
+
+# OPTC-DB API URLs ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+unitURL = "https://optc-db.github.io/common/data/units.js"
+unitsPath = "C:/redditBot/units.txt"
+detailsURL = "https://optc-db.github.io/common/data/details.js"
+detailsPath = "C:/redditBot/details.txt"
+cdURL = "https://optc-db.github.io/common/data/cooldowns.js"
+cdPath = "C:/redditBot/cooldowns.txt"
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
