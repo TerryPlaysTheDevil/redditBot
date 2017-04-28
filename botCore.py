@@ -1,59 +1,41 @@
 import praw, time, re
-import flairEnforcer as flair
-import config as c
-import unitReport as ur
-
-
-# Probation Bot ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-def updateBannedUsers(subreddit):
-    c.giveaway_banned_users.clear()
-    page = subreddit.wiki['mods/giveawaybans']
-    list = page.content_md.split(';')
-    for name in list:
-        c.giveaway_banned_users.append(name.strip())
-        if name == '':
-            c.giveaway_banned_users.remove(name)
-    print(c.giveaway_banned_users)
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+import flairEnforcer as flair, config as c, unitReport as ur, logger as log, probation as prob
 
 
 # Controllers ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def initiateUnitReportCheck(comment):
-    if comment.id not in c.checked_comments:
-        if "!unit " in comment.body and comment.author == "lolTerryP":
-            regex = re.findall('!unit (\d+)', comment.body)
-            output = ""
-            i = 0
-            for number in regex:
-                if i > 2:
-                    break
-                output += ur.buildReport(number)
-                i += 1
-            output += c.MESSAGE_FOOTER
-            comment.reply(output)
-            print("Replied to " + comment.permalink(fast=True))
-        c.checked_comments.append(comment.id)
-
+    try:
+        if comment.id not in c.checked_comments:
+            if "!unit " in comment.body and comment.author == "lolTerryP":
+                regex = re.findall('!unit (\d+)', comment.body)
+                output = ""
+                i = 0
+                for number in regex:
+                    if i > 2:
+                        break
+                    output += ur.buildReport(number)
+                    i += 1
+                output += c.MESSAGE_FOOTER
+                comment.reply(output)
+                log.unitReported(comment.permalink(fast=True))
+            c.checked_comments.append(comment.id)
+    except Exception as e:
+        log.unhandledException(exception=e, location="botCore.initiateUnitReportCheck()")
 
 def checkFlairs(reddit, subreddit):
     # FlairEnforcer
     try:
         flair.checkNewSubmissions(subreddit=subreddit, approved_submissions=c.approved_submissions,
-                                  submissions_with_no_flair=c.submissions_with_no_flair)
+                                  submissions_with_no_flair=c.submissions_with_no_flair, self="")
     except Exception as e:
-        print(">>> Unhandled exception occured: " + str(type(e)))
+        log.unhandledException(exception=e, location="botCore.checkFlairs()_newSubmissions")
     
     try:
         flair.revisitSubmissions(reddit=reddit, approved_submissions=c.approved_submissions,
                                  submissions_with_no_flair=c.submissions_with_no_flair,
-                                 removed_submissions=c.removed_submissions, id_for_replies=c.id_for_replies)
+                                 removed_submissions=c.removed_submissions, id_for_replies=c.id_for_replies, self="")
     except Exception as e:
-        print(">>> Unhandled exception occured: " + str(type(e)))
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+        log.unhandledException(exception=e, location="botCore.checkFlairs()_oldSubmissions")
 
 
 # Initialization ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -62,26 +44,36 @@ reddit = praw.Reddit(client_id=c.BOT_LOGIN_CLIENT_ID, client_secret=c.BOT_LOGIN_
 subreddit = reddit.subreddit(c.BOT_SUBREDDIT_TO_MONITOR)
 i = 0
 
-while 1:
-    # checkFlairs(reddit=reddit, subreddit=subreddit)
-    updateBannedUsers(subreddit)
-    
-    
-    for comment in subreddit.comments(limit=5):
-        # UnitReporter
-        initiateUnitReportCheck(comment)
-        if " Weekly Updated Giveaway Megathread" in comment.submission.title:
-            print(comment.id + " ::: in GA thread")
-        print(comment.id)
 
-    # UnitReporter Update
-    if i == 0:
-        #updateBannedUsers(subreddit)
-        ur.updateFiles()
-    elif i == 1000:
-        updateBannedUsers(subreddit)
-        ur.updateFiles()
-        i = 1
+while 1:
+    try:
+        ### checkFlairs is a fully functional Flair-Enforcer. It's currently disabled because no subreddit I moderate
+        #  requires me to host one of these.
+        # checkFlairs(reddit=reddit, subreddit=subreddit)
+        
+        # Update all required files
+        if i == 0:
+            prob.updateBannedUsers(subreddit)
+            ur.updateFiles()
+        elif i == 100:
+            prob.updateBannedUsers(subreddit)
+            ur.updateFiles()
+            i = 1
+       
+        for comment in subreddit.comments(limit=5):
+            # UnitReporter
+            initiateUnitReportCheck(comment)
+            if comment.author in c.giveaway_banned_users:
+                prob.probationControl(comment)
+    except ConnectionResetError:
+        time.sleep(30)
+    except ConnectionRefusedError:
+        time.sleep(30)
+    except ConnectionAbortedError:
+        time.sleep(30)
+    except ConnectionError:
+        time.sleep(30)
+    except Exception as e:
+        log.unhandledException(exception=e, location="botCore.main()")
     i += 1
-    
     time.sleep(c.BOT_CYCLE_TIME)

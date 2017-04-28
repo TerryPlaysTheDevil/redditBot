@@ -1,5 +1,5 @@
 import urllib.request, json, re
-import config as c
+import config as c, logger as log
 
 
 # Unit Reporter ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -25,10 +25,8 @@ def updateDetailsFiles():
     for index in indexes:
         end = text.__len__()
         text = (
-            text[0:index.start() + 4 + 2 * i] + '"' + text[index.start() + 4
-                                                           + 2 * i:index.end() + 2 * i] + '"' + text[
-                                                                                                index.end() + 2 *
-                                                                                                              i:end])
+            text[0:index.start() + 4 + 2 * i] + '"' + text[index.start() + 4 + 2 * i:index.end() + 2 * i] + '"' + text[
+                                                                                    index.end() + 2 * i:end])
         i += 1
     # Fix the JSON
     text = text.replace('special:', '"special":')
@@ -67,9 +65,8 @@ def unitReport(id):
     try:
         return data[int(id) - 1]
     except IndexError:
-        return str(
-            "\n\n- The Index '" + id + "' is not linked to a unit in my database. Please make sure that you use a "
-                                       "valid ID and try again.")
+        return str("\n\n- The Index '" + id + "' is not linked to a unit in my database. Please make sure that you "
+                                              "use a valid ID and try again.")
 
 
 def detailReport(id):
@@ -78,7 +75,7 @@ def detailReport(id):
     try:
         return data[str(id)]
     except KeyError:
-        print("### Error - Details for ID could not be found: " + id)
+        log.unhandledException(exception=KeyError, location="unitReport.detailReport()")
 
 
 def cooldownReport(id):
@@ -169,6 +166,11 @@ def buildReport(number):
 
 
 def updateFiles():
-    updateUnitFiles()
-    updateDetailsFiles()
-    updateCooldownsFiles()
+    try:
+        updateUnitFiles()
+        updateDetailsFiles()
+        updateCooldownsFiles()
+        log.successfulUpdate("unitReport.updateFiles()")
+    except Exception as e:
+        log.unhandledException(e, "unitResport.updateFiles()")
+        

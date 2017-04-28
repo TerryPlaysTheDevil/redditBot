@@ -1,3 +1,5 @@
+import platform
+
 # Configuration Section ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 BOT_SUBREDDIT_TO_MONITOR = "OnePieceTC"  # Add more than one like so: "Subreddit_1+Subreddit_2+Subreddit_3"
 BOT_LOGIN_NAME = "OPTCBot"
@@ -16,8 +18,29 @@ MESSAGE_FOOTER = "\n\n-----\n**[Please read this.](/str)** I am a bot in develop
                  " him by clicking [here](https://www.reddit.com/message/compose?to=lolTerryP&subject=OPTCBot)."
 
 
+# File directories ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if platform.system() == "Linux":
+    unitsPath = "/bin/redditBot/files/units.txt"
+    detailsPath = "/bin/redditBot/files/details.txt"
+    cdPath = "/bin/redditBot/files/cooldowns.txt"
+    logFile = "bin/redditBot/log.txt"
+elif platform.system() == "Windows":
+    unitsPath = "C:/redditBot/units.txt"
+    detailsPath = "C:/redditBot/details.txt"
+    cdPath = "C:/redditBot/cooldowns.txt"
+    logFile = "C:/redditBot/log.txt"
+
+
 # Probation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 giveaway_banned_users = []
+giveaway_ban_message_title = 'You have been permanently banned from /r/OnePieceTC'
+giveaway_ban_message_1 = 'Hello '
+giveaway_ban_message_2 = ',\n\nbecause of previous misbehavior the moderators of /r/OnePieceTC have placed you on ' \
+                         'probation. You have violated the rules of this agreement by submitting another comment to ' \
+                         'the GiveAway thread. Because of this, you have been banned from the subreddit permanently. ' \
+                         '\n\n ' \
+                         'If you want to appeal the ban, please send a modmail to the moderators of /r/OnePiece. '
+giveaway_handled = []
 
 
 # Flair Enforcer ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -54,7 +77,10 @@ def decideSubreddit(subreddit):
         return FLAIR_FLAIR_MISSING_MESSAGE_DEFAULT
 
 
-# Unit Report Stats ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Unit Report ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+unitURL = "https://optc-db.github.io/common/data/units.js"
+detailsURL = "https://optc-db.github.io/common/data/details.js"
+cdURL = "https://optc-db.github.io/common/data/cooldowns.js"
 UNIT_STAT_NAME = ""
 UNIT_STAT_TYPE = ""
 UNIT_STAT_CLASS1 = ""
@@ -91,13 +117,5 @@ MESSAGE_UNIT_REPORT_SPECIAL2 = "  "
 MESSAGE_UNIT_REPORT_COOLDOWN1 = "  \n  *Cooldown "
 MESSAGE_UNIT_REPORT_COOLDOWN2 = " → "
 MESSAGE_UNIT_REPORT_COOLDOWN3 = "* \n"
-
-# OPTC-DB API URLs ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-unitURL = "https://optc-db.github.io/common/data/units.js"
-unitsPath = "C:/redditBot/units.txt"
-detailsURL = "https://optc-db.github.io/common/data/details.js"
-detailsPath = "C:/redditBot/details.txt"
-cdURL = "https://optc-db.github.io/common/data/cooldowns.js"
-cdPath = "C:/redditBot/cooldowns.txt"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
