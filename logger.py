@@ -18,7 +18,7 @@ def unhandledException(exception, location):
 def successfulUpdate(location):
     with open(c.logFile, "r") as log:
         oldText = log.read()
-    newText = (oldText + timestamp() + " ::: '" + location + "' successfully updated all files\n")
+    newText = (oldText + timestamp() + " ::: UnitReport ::: '" + location + "' successfully updated all files\n")
     with open(c.logFile, "w") as log:
         log.write(newText)
 
@@ -42,9 +42,8 @@ def newSubmission(submission):
 def submissionRemoved(submission):
     with open(c.logFile, "r") as log:
         oldText = log.read()
-    newText = (
-        oldText + timestamp() + " ::: FlairBot ::: Submission '" + submission + "' has been removed for not adding a "
-                                                                                "flair'\n")
+    newText = (oldText + timestamp() + " ::: FlairBot ::: Submission '" + submission + "' has been removed for not "
+                                                                                       "adding a flair\n")
     with open(c.logFile, "w") as log:
         log.write(newText)
 
@@ -53,8 +52,7 @@ def submissionReinstated(submission):
     with open(c.logFile, "r") as log:
         oldText = log.read()
     newText = (oldText + timestamp() + " ::: FlairBot ::: Submission '" + submission + "' has been reinstated after "
-                                                                                       "adding a "
-                                                                                       "flair'\n")
+                                                                                       "adding a flair\n")
     with open(c.logFile, "w") as log:
         log.write(newText)
 
@@ -62,8 +60,7 @@ def submissionReinstated(submission):
 def submissionMonitoringStopped(submission):
     with open(c.logFile, "r") as log:
         oldText = log.read()
-    newText = (
-        oldText + timestamp() + " ::: FlairBot ::: Submission '" + submission + "' has been removed from "
+    newText = (oldText + timestamp() + " ::: FlairBot ::: Submission '" + submission + "' has been removed from "
                                                                                 "monitoring'\n")
     with open(c.logFile, "w") as log:
         log.write(newText)
@@ -72,7 +69,16 @@ def submissionMonitoringStopped(submission):
 def probationViolation(name, comment):
     with open(c.logFile, "r") as log:
         oldText = log.read()
-    newText = (oldText + timestamp() + " ::: User " + name + " banned for Probation Violation ::: Trigger: " +
+    newText = (oldText + timestamp() + " ::: Probation ::: User " + name + " banned for Probation Violation ::: "
+                                                                           "Trigger: " +
                comment + "\n")
+    with open(c.logFile, "w") as log:
+        log.write(newText)
+
+
+def connectionError(name):
+    with open(c.logFile, "r") as log:
+        oldText = log.read()
+    newText = (oldText + timestamp() + " >>> An error occurred when trying to connect to Reddit: " + name + "\n")
     with open(c.logFile, "w") as log:
         log.write(newText)

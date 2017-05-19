@@ -22,7 +22,9 @@ def probationControl(reddit, subreddit, comment):
                                                                   comment.author.name + c.giveaway_ban_message_2))
             c.giveaway_handled.append(comment.permalink)
             log.probationViolation(name=comment.author.name, comment=comment.permalink)
-            subreddit.banned.add(comment.author.name, ban_reason='OPTCBot: Account Hoarding - Automatic Ban for '
-                                                                 'Probation Violation')
+            subreddit.message(subject="Probation Violation - " + comment.author.name, message="u/" +
+                    comment.author.name + " has broken his probation. Please investigate as soon as possible.")
+            #subreddit.banned.add(comment.author.name, ban_reason='OPTCBot: Account Hoarding - Automatic Ban for '
+            #                                                     'Probation Violation')
         except Exception as e:
             log.unhandledException(exception=e, location="probation.probationControl()")
