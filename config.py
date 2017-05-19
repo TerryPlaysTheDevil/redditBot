@@ -13,23 +13,26 @@ BOT_CYCLE_TIME = 5  # How long do you want the bot to sleep after every run. Be 
 # seconds to complete, so a 5 second cycle pause would mean a completed run about every 10 seconds
 
 # Message Footer
-MESSAGE_FOOTER = "\n\n-----\n**[Please read this.](/str)** I am a bot in development by /u/lolTerryP. If you have a " \
-                 "suggestion or a question, feel free to PM" \
-                 " him by clicking [here](https://www.reddit.com/message/compose?to=lolTerryP&subject=OPTCBot)."
-
+if platform.system() == "Windows":
+    MESSAGE_FOOTER = "\n\n-----\n**[Please read this.](/str)** I am a bot in development by /u/lolTerryP. If you have a " \
+                     "suggestion or a question, feel free to PM him by clicking [here](" \
+                     "https://www.reddit.com/message/compose?to=lolTerryP&subject=OPTCBot). \n\n This is a TEST version of the bot!"
+else:
+    MESSAGE_FOOTER = "\n\n-----\n**[Please read this.](/str)** I am a bot in development by /u/lolTerryP. If you have a" \
+                     " suggestion or a question, feel free to PM him by clicking [here](" \
+                     "https://www.reddit.com/message/compose?to=lolTerryP&subject=OPTCBot)."
 
 # File directories ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if platform.system() == "Linux":
     unitsPath = "/bin/redditBot/files/units.txt"
     detailsPath = "/bin/redditBot/files/details.txt"
     cdPath = "/bin/redditBot/files/cooldowns.txt"
-    logFile = "bin/redditBot/log.txt"
+    logFile = "/bin/redditBot/files/log.txt"
 elif platform.system() == "Windows":
     unitsPath = "C:/redditBot/units.txt"
     detailsPath = "C:/redditBot/details.txt"
     cdPath = "C:/redditBot/cooldowns.txt"
     logFile = "C:/redditBot/log.txt"
-
 
 # Probation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 giveaway_banned_users = []
@@ -41,7 +44,6 @@ giveaway_ban_message_2 = ',\n\nbecause of previous misbehavior the moderators of
                          '\n\n ' \
                          'If you want to appeal the ban, please send a modmail to the moderators of /r/OnePiece. '
 giveaway_handled = []
-
 
 # Flair Enforcer ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 approved_submissions = []
@@ -65,6 +67,7 @@ FLAIR_FLAIR_MISSING_MESSAGE_OPTC = ("/r/OnePieceTC requires you to flair your po
                                     "and you will have to resubmit your post.\n\n")
 FLAIR_FLAIR_MISSING_MESSAGE_NARUTO = ""
 
+
 def decideSubreddit(subreddit):
     if subreddit == "OnePieceTC":
         return (FLAIR_FLAIR_MISSING_MESSAGE_OPTC)
@@ -81,6 +84,8 @@ def decideSubreddit(subreddit):
 unitURL = "https://optc-db.github.io/common/data/units.js"
 detailsURL = "https://optc-db.github.io/common/data/details.js"
 cdURL = "https://optc-db.github.io/common/data/cooldowns.js"
+unlocked_users = []
+
 UNIT_STAT_NAME = ""
 UNIT_STAT_TYPE = ""
 UNIT_STAT_CLASS1 = ""
@@ -91,7 +96,6 @@ UNIT_STAT_RCV = ""
 UNIT_STAT_SOCKETS = ""
 UNIT_STAT_COMBO = ""
 UNIT_STAT_CAPTAIN = ""
-UNIT_STAT_CAPTAIN_NAME = ""
 UNIT_STAT_SAILOR = ""
 UNIT_STAT_SPECIAL = ""
 UNIT_STAT_SPECIAL_NAME = ""
