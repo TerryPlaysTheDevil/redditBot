@@ -6,9 +6,9 @@ if platform.system() == "Linux":
 elif platform.system() == "Windows":
     BOT_SUBREDDIT_TO_MONITOR = "OnePieceTC"  # Add more than one like so: "Subreddit_1+Subreddit_2+Subreddit_3"
 BOT_LOGIN_NAME = "OPTCBot"
-BOT_LOGIN_PASSWORD = "wrSQHSSMsrKHm$@Xu7g8&$nN6P9hCtYJD*H2sRh@bMF"
-BOT_LOGIN_CLIENT_ID = "xEKIjwnolMirSw"
-BOT_LOGIN_SECRET = "ZIwaJdNWO8aZRy0bWnDzFch5jcA"
+BOT_LOGIN_PASSWORD = redacted
+BOT_LOGIN_CLIENT_ID = redacted
+BOT_LOGIN_SECRET = redacted
 
 BOT_USER_AGENT = "Subreddit monitoring and moderation bot with some subreddit specific functionalities for " \
                  "/r/OnePieceTC by /u/lolTerryP"
