@@ -1,5 +1,8 @@
-import urllib.request, json, re
-import config as c, logger as log
+import json
+import re
+import urllib.request
+import config as c
+import logger as log
 
 
 # Unit Reporter ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -23,9 +26,18 @@ def updateUnitFiles():
     text = text.replace("window.units = ", "")
     text = text.replace("    ", "")
     text = text.rsplit("],\n];")[0]
+    text = text.replace("'6+'", '"6+"')
     text += "]\n]"
-    with open(c.unitsPath, "w") as unitsFile:
-        unitsFile.write(text)
+    try:
+        with open(c.unitsPathTemp, "w") as file:
+            file.write(text)
+        with open(c.unitsPathTemp) as data:
+            json.load(data)
+        with open(c.unitsPath, "w") as file:
+            file.write(text)
+        log.updateSuccessful("updateUnitFiles")
+    except Exception as e:
+        log.updateFailed(e=e, location="updateUnitFiles")
 
 
 def updateDetailsFiles():
@@ -54,11 +66,22 @@ def updateDetailsFiles():
     text = text.replace('",\n    },', '"\n    },')
     text = text.replace('],\n            }', ']\n            }')
     text = text.replace('], \n            }', '] \n            }')
+    # Cleaning the file end
     text = text.replace('},\n};', '}\n}')
+    text = text.replace('},\n};', '}\n}')
+    text = re.sub(r"(\},\n*[\s]*\n};)", "}\n}", text)
     # Remove comment artifacts
     text = re.sub(r"\/\/.*\n", "\n", text)
-    with open(c.detailsPath, "w") as detailsFile:
-        detailsFile.write(text)
+    try:
+        with open(c.detailsPathTemp, "w") as file:
+            file.write(text)
+        with open(c.detailsPathTemp) as data:
+            json.load(data)
+        with open(c.detailsPath, "w") as file:
+            file.write(text)
+        log.updateSuccessful("updateDetailsFiles")
+    except Exception as e:
+        log.updateFailed(e=e, location="updateDetailsFile")
 
 
 def updateCooldownsFiles():
@@ -68,8 +91,16 @@ def updateCooldownsFiles():
     text = text.replace("window.cooldowns = ", "")
     text = text.rsplit(',', 1)[0] + "\n]"
     text = re.sub(r"\/\/.*\n", "\n", text)
-    with open(c.cdPath, "w") as cdFile:
-        cdFile.write(text)
+    try:
+        with open(c.cdPathTemp, "w") as file:
+            file.write(text)
+        with open(c.cdPathTemp) as data:
+            json.load(data)
+        with open(c.cdPath, "w") as file:
+            file.write(text)
+        log.updateSuccessful("updateCooldownsFiles")
+    except Exception as e:
+        log.updateFailed(e=e, location="updateCooldownsFile")
 
 
 # Data Fetchers ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -146,7 +177,7 @@ def buildStats(number):
         c.UNIT_STAT_HP = getHP(unit)
         c.UNIT_STAT_ATK = getATK(unit)
         c.UNIT_STAT_RCV = getRCV(unit)
-        
+
         if layout == 1:
             text = c.MESSAGE_UNIT_REPORT_NAME + c.UNIT_STAT_NAME + c.MESSAGE_UNIT_REPORT_TYPE + c.UNIT_STAT_TYPE + \
                    c.MESSAGE_UNIT_REPORT_CLASS1 + c.UNIT_STAT_CLASS + c.MESSAGE_UNIT_REPORT_HP + c.UNIT_STAT_HP + \
@@ -154,7 +185,7 @@ def buildStats(number):
                    c.MESSAGE_UNIT_REPORT_SOCKETS + c.UNIT_STAT_SOCKETS + c.MESSAGE_UNIT_REPORT_COMBO + c.UNIT_STAT_COMBO
         elif layout == 2:
             text = "\n* **[" + c.UNIT_STAT_NAME + "](http://optc-db.github.io/characters/#/view/" + number + ")** - " \
-                                                                                                              "[" + \
+                                                                                                             "[" + \
                    c.UNIT_STAT_TYPE.upper() + "](/" + c.UNIT_STAT_TYPE + ") " + c.UNIT_STAT_CLASS + "  \n " + \
                    c.UNIT_STAT_HP + " HP | " + c.UNIT_STAT_ATK + " ATK | " + c.UNIT_STAT_RCV + " RCV  \n " + \
                    c.UNIT_STAT_SOCKETS + " Sockets, " + c.UNIT_STAT_COMBO + " CMB \n\n"
@@ -214,26 +245,29 @@ def getCooldowns(cd):
     except Exception:
         return "??"
 
+
 def preBuildAbilities(number):
     unit = unitReport(number)
     c.UNIT_STAT_NAME = getName(unit)
-    return "* **[" + c.UNIT_STAT_NAME + "](http://optc-db.github.io/characters/#/view/" + number + ")**" + \
-           buildAbilities(number)
-    
+    c.UNIT_STAT_TYPE = getTypes(unit)
+    c.UNIT_STAT_CLASS = getClasses(unit)
+    return str(
+        "  \n* **[" + c.UNIT_STAT_NAME + "](http://optc-db.github.io/characters/#/view/" + number + ")** - [" + c.UNIT_STAT_TYPE.upper() + "](/" + c.UNIT_STAT_TYPE + ") " + c.UNIT_STAT_CLASS
+        + buildAbilities(number))
 
 
 def buildAbilities(number):
     layout = 2
     details = detailReport(number)
     cd = cooldownReport(number)
-    
+
     c.UNIT_STAT_CAPTAIN = getCaptain(details)
     c.UNIT_STAT_SAILOR = getSailor(details)
-    
+
     temp = getSpecial(details)
     c.UNIT_STAT_SPECIAL = temp[0]
     multiLevelSpecial = temp[1]
-    
+
     if not multiLevelSpecial:
         tempCD = getCooldowns(cd)
         if isinstance(tempCD, tuple):
@@ -242,7 +276,7 @@ def buildAbilities(number):
         else:
             c.UNIT_STAT_COOLDOWN_MAX = tempCD
             c.UNIT_STAT_COOLDOWN_MIN = tempCD
-    
+
     try:
         c.UNIT_STAT_SPECIAL_NAME = details["specialName"]
     except KeyError:
@@ -255,14 +289,14 @@ def buildAbilities(number):
         text = c.MESSAGE_UNIT_REPORT_CAPTAIN + c.UNIT_STAT_CAPTAIN + c.MESSAGE_UNIT_REPORT_SAILOR + \
                c.UNIT_STAT_SAILOR + c.MESSAGE_UNIT_REPORT_SPECIAL1 + c.UNIT_STAT_SPECIAL_NAME + \
                c.MESSAGE_UNIT_REPORT_SPECIAL2 + c.UNIT_STAT_SPECIAL + c.MESSAGE_UNIT_REPORT_SPECIAL2
-        
+
         if not multiLevelSpecial:
             text += c.MESSAGE_UNIT_REPORT_COOLDOWN1 + c.UNIT_STAT_COOLDOWN_MAX + c.MESSAGE_UNIT_REPORT_COOLDOWN2 + \
                     c.UNIT_STAT_COOLDOWN_MIN + c.MESSAGE_UNIT_REPORT_COOLDOWN3
     if layout == 2:
-        text = " \n * " + c.UNIT_STAT_CAPTAIN + "  \n * " + c.UNIT_STAT_SAILOR + "  \n * " + c.UNIT_STAT_SPECIAL
+        text = "\n * " + c.UNIT_STAT_CAPTAIN + "  \n * " + c.UNIT_STAT_SAILOR + "  \n * " + c.UNIT_STAT_SPECIAL
         if not multiLevelSpecial:
-            text += "\n  *" + c.UNIT_STAT_COOLDOWN_MAX + "* → *" + c.UNIT_STAT_COOLDOWN_MIN + "*"
+            text += "  \n  *Cooldown: " + c.UNIT_STAT_COOLDOWN_MAX + "* → *" + c.UNIT_STAT_COOLDOWN_MIN + "*"
     return text
 
 
@@ -273,11 +307,7 @@ def buildReport(number):
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-def botHasNotAnswered(comment):
-    for reply in comment.replies:
-        if reply.author.name == "OPTCBot":
-            return False
-    return True
+
 
 
 def updateFiles():
@@ -285,6 +315,5 @@ def updateFiles():
         updateUnitFiles()
         updateDetailsFiles()
         updateCooldownsFiles()
-        log.successfulUpdate("unitReport.updateFiles()")
     except Exception as e:
         log.unhandledException(e, "unitResport.updateFiles()")

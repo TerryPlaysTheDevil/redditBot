@@ -1,7 +1,10 @@
 import platform
 
 # Configuration Section ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-BOT_SUBREDDIT_TO_MONITOR = "OnePieceTC"  # Add more than one like so: "Subreddit_1+Subreddit_2+Subreddit_3"
+if platform.system() == "Linux":
+    BOT_SUBREDDIT_TO_MONITOR = "OnePieceTC"
+elif platform.system() == "Windows":
+    BOT_SUBREDDIT_TO_MONITOR = "OnePieceTC"  # Add more than one like so: "Subreddit_1+Subreddit_2+Subreddit_3"
 BOT_LOGIN_NAME = "OPTCBot"
 BOT_LOGIN_PASSWORD = "wrSQHSSMsrKHm$@Xu7g8&$nN6P9hCtYJD*H2sRh@bMF"
 BOT_LOGIN_CLIENT_ID = "xEKIjwnolMirSw"
@@ -11,6 +14,8 @@ BOT_USER_AGENT = "Subreddit monitoring and moderation bot with some subreddit sp
                  "/r/OnePieceTC by /u/lolTerryP"
 BOT_CYCLE_TIME = 5  # How long do you want the bot to sleep after every run. Be aware that each cycle takes about 5
 # seconds to complete, so a 5 second cycle pause would mean a completed run about every 10 seconds
+
+SUB_MODERATORS = []
 
 # Message Footer
 if platform.system() == "Windows":
@@ -24,14 +29,20 @@ else:
 
 # File directories ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if platform.system() == "Linux":
-    unitsPath = "/bin/redditBot/files/units.txt"
-    detailsPath = "/bin/redditBot/files/details.txt"
-    cdPath = "/bin/redditBot/files/cooldowns.txt"
+    unitsPath = "/bin/redditBot/files/units.json"
+    unitsPathTemp = "/bin/redditBot/files/units_temp.json"
+    detailsPath = "/bin/redditBot/files/details.json"
+    detailsPathTemp = "/bin/redditBot/files/details_temp.json"
+    cdPath = "/bin/redditBot/files/cooldowns.json"
+    cdPathTemp = "/bin/redditBot/files/cooldowns_temp.json"
     logFile = "/bin/redditBot/files/log.txt"
 elif platform.system() == "Windows":
-    unitsPath = "C:/redditBot/units.txt"
-    detailsPath = "C:/redditBot/details.txt"
-    cdPath = "C:/redditBot/cooldowns.txt"
+    unitsPath = "C:/redditBot/units.json"
+    unitsPathTemp = "C:/redditBot/units_temp.json"
+    detailsPath = "C:/redditBot/details.json"
+    detailsPathTemp = "C:/redditBot/details_temp.json"
+    cdPath = "C:/redditBot/cooldowns.json"
+    cdPathTemp = "C:/redditBot/cooldowns_temp.json"
     logFile = "C:/redditBot/log.txt"
 
 # Probation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -49,7 +60,8 @@ giveaway_handled = []
 approved_submissions = []
 submissions_with_no_flair = []
 removed_submissions = []
-checked_comments = []
+ur_checked_comments = []
+t_checked_comments = []
 id_for_replies = {}
 SUBMISSION_FETCH_LIMIT = 10
 FLAIR_TIME_LIMIT = 1020  # If you change this, change it in the FLAIR_FLAIR_MISSING_MESSAGE as well

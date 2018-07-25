@@ -15,10 +15,26 @@ def unhandledException(exception, location):
         log.write(newText)
 
 
-def successfulUpdate(location):
+def updateSuccessful(location):
     with open(c.logFile, "r") as log:
         oldText = log.read()
-    newText = (oldText + timestamp() + " ::: UnitReport ::: '" + location + "' successfully updated all files\n")
+    newText = (oldText + timestamp() + " ::: UnitReport ::: '" + location + "' successfully updated\n")
+    with open(c.logFile, "w") as log:
+        log.write(newText)
+
+def updateFailed(e, location):
+    with open(c.logFile, "r") as log:
+        oldText = log.read()
+    newText = (oldText + timestamp() + " >>> UnitReport ::: '" + str(e) + "' - '" + location + "' could not update " \
+                                                                                    "successfully!\n")
+    with open(c.logFile, "w") as log:
+        log.write(newText)
+
+
+def sidebar(content):
+    with open(c.logFile, "r") as log:
+        oldText = log.read()
+    newText = (oldText + timestamp() + " ::: Sidebar ::: '" + content + "' successfully updated\n")
     with open(c.logFile, "w") as log:
         log.write(newText)
 
@@ -61,7 +77,7 @@ def submissionMonitoringStopped(submission):
     with open(c.logFile, "r") as log:
         oldText = log.read()
     newText = (oldText + timestamp() + " ::: FlairBot ::: Submission '" + submission + "' has been removed from "
-                                                                                "monitoring'\n")
+                                                                                       "monitoring'\n")
     with open(c.logFile, "w") as log:
         log.write(newText)
 
