@@ -1,5 +1,5 @@
 import time
-import config as c
+import config as c, logger as log
 
 
 #  Flair Enforcer ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -34,7 +34,7 @@ def revisitSubmissions(self, reddit, approved_submissions, submissions_with_no_f
         if reddit.submission(id=id).link_flair_text is None and (time.time() - reddit.submission(
                 id=id).created_utc) \
                 < c.FLAIR_TIME_LIMIT and id not in removed_submissions:
-            print(str(time.time() - reddit.submission(id=id).created_utc) + " ::: " + id + " unflaired, removing")
+            log.submissionRemoved(id)
             removeUnflairedSubmission(id=id, reddit=reddit, id_for_replies=id_for_replies)
             removed_submissions.append(id)
         
@@ -42,20 +42,19 @@ def revisitSubmissions(self, reddit, approved_submissions, submissions_with_no_f
         elif reddit.submission(id=id).link_flair_text is None and (
                     time.time() - reddit.submission(id=id).created_utc) \
                 < c.FLAIR_TIME_LIMIT and id in removed_submissions:
-            print(str(time.time() - reddit.submission(id=id).created_utc) + " ::: " + id + " still unflaired")
+            pass
         
         # Submission has been flaired
         elif reddit.submission(id=id).link_flair_text is not None:
             submissions_with_no_flair.remove(id)
-            print(str(
-                time.time() - reddit.submission(id=id).created_utc) + " ::: " + id + " flair added, reinstating")
+            log.submissionReinstated(id)
             reinstateSubmission(id=id, reddit=reddit, id_for_replies=id_for_replies)
             approved_submissions.append(id)
         
         # Submission has not been flaired and is now older than 5 minutes
         elif time.time() - reddit.submission(id=id).created_utc >= c.FLAIR_TIME_LIMIT:
             submissions_with_no_flair.remove(id)
-            print(str(time.time() - reddit.submission(id=id).created_utc) + " ::: " + id + " time out")
+            log.submissionMonitoringStopped(id)
             approved_submissions.append(id)
         # Something else happened, should actually never be triggered
         else:
@@ -64,5 +63,5 @@ def revisitSubmissions(self, reddit, approved_submissions, submissions_with_no_f
                     reddit.submission(id=id).created_utc) + " - Flairtext: "
                                                             "" + str(
                     reddit.submission(id)) + " ::: SOMETHING HAPPENED")
-            
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
